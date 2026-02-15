@@ -1,35 +1,51 @@
 package main
 
-type InventarioItem struct {
-	ProductoID int
-	Stock      int
+import "errors"
+
+type Inventario struct {
+	stock map[int]int
 }
 
-// Función pura: crea un item de inventario
-func CrearItemInventario(productoID int, stock int) InventarioItem {
-	return InventarioItem{
-		ProductoID: productoID,
-		Stock:      stock,
+func NuevoInventario() *Inventario {
+	return &Inventario{stock: make(map[int]int)}
+}
+
+func (i *Inventario) SetStock(productoID int, cantidad int) error {
+	if productoID <= 0 {
+		return errors.New("productoID inválido")
 	}
-}
-
-// Función pura: aumenta stock y devuelve el item actualizado
-func AumentarStock(item InventarioItem, cantidad int) InventarioItem {
 	if cantidad < 0 {
-		return item // no cambia si es inválido
+		return errors.New("cantidad inválida")
 	}
-	item.Stock += cantidad
-	return item
+	i.stock[productoID] = cantidad
+	return nil
 }
 
-// Función pura: reduce stock si alcanza, devuelve (itemActualizado, ok)
-func ReducirStock(item InventarioItem, cantidad int) (InventarioItem, bool) {
-	if cantidad < 0 {
-		return item, false
+func (i *Inventario) ObtenerStock(productoID int) int {
+	return i.stock[productoID]
+}
+
+func (i *Inventario) AumentarStock(productoID int, cantidad int) error {
+	if productoID <= 0 {
+		return errors.New("productoID inválido")
 	}
-	if item.Stock < cantidad {
-		return item, false
+	if cantidad <= 0 {
+		return errors.New("cantidad inválida")
 	}
-	item.Stock -= cantidad
-	return item, true
+	i.stock[productoID] += cantidad
+	return nil
+}
+
+func (i *Inventario) ReducirStock(productoID int, cantidad int) error {
+	if productoID <= 0 {
+		return errors.New("productoID inválido")
+	}
+	if cantidad <= 0 {
+		return errors.New("cantidad inválida")
+	}
+	if i.stock[productoID] < cantidad {
+		return errors.New("stock insuficiente")
+	}
+	i.stock[productoID] -= cantidad
+	return nil
 }
